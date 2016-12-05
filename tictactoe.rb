@@ -1,4 +1,4 @@
-require 'pry'
+
 
 INITIAL_MARKER = ' '.freeze
 PLAYER_MARKER = 'X'.freeze
@@ -8,7 +8,11 @@ WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] +
                 [[1, 5, 9], [3, 5, 7]].freeze
 
 puts 'Welcome to Tic Tac Toe v1.0'
-puts ' '
+puts
+
+def clear_screen
+  system('clear') || system('cls')
+end
 
 def show_board(brd)
   puts "You're a #{PLAYER_MARKER}. Computer is #{COMPUTER_MARKER}"
@@ -32,8 +36,7 @@ end
 def risk_square(line, board, marker)
   if board.values_at(*line).count(marker) == 2
     board.select do |key, value|
-      line.include?(key) &&
-        value == INITIAL_MARKER
+      line.include?(key) && value == INITIAL_MARKER
     end.keys.first
   end
 end
@@ -50,21 +53,14 @@ def player_move!(brd)
 end
 
 def computer_move!(brd)
-  system 'cls'
+  clear_screen
   choice = nil
 
-  # offense
+  # smart-move
   WINNING_LINES.each do |line|
-    choice = risk_square(line, brd, COMPUTER_MARKER)
+    choice = risk_square(line, brd, COMPUTER_MARKER) ||
+             risk_square(line, brd, PLAYER_MARKER)
     break if choice
-  end
-
-  # defense
-  unless choice
-    WINNING_LINES.each do |line|
-      choice = risk_square(line, brd, PLAYER_MARKER)
-      break if choice
-    end
   end
 
   unless choice
@@ -97,8 +93,10 @@ end
 
 player_win_count = 0
 computer_win_count = 0
-loop do
+
+loop do # main loop
   board = initialize_board
+
   loop do
     break if someone_won?(board) || board_full?(board)
     show_board(board)
@@ -109,10 +107,10 @@ loop do
   show_board(board)
 
   if someone_won?(board)
-    puts ' '
+    puts
     puts "#{detect_winner(board)} won!"
   else
-    puts ' '
+    puts
     puts "It's a tie!"
   end
 
@@ -124,13 +122,15 @@ loop do
 
   puts "Player has #{player_win_count} wins."
   puts "Computer has #{computer_win_count} wins"
+  puts
 
   break if player_win_count == 5 || computer_win_count == 5
 
-  puts 'Would you like to play again? (Y or N)?'
+  puts 'Type Y to play again , or anything else to quit.'
   play_again_answer = gets.chomp.downcase
-  break unless play_again_answer.start_with?('y')
+  clear_screen
+  break unless play_again_answer == 'y'
 end
 
-puts ' '
+puts
 puts 'Thanks for playing Tic Tac Toe v1.0.'
