@@ -29,12 +29,12 @@ def empty_squares(brd)
   brd.keys.select { |num| brd[num] == INITIAL_MARKER }
 end
 
-def risk_square(line , board, marker)
+def risk_square(line, board, marker)
   if board.values_at(*line).count(marker) == 2
-    board.select{|key, value| line.include?(key) &&
-    value == INITIAL_MARKER}.keys.first
-  else
-    nil
+    board.select do |key, value|
+      line.include?(key) &&
+        value == INITIAL_MARKER
+    end.keys.first
   end
 end
 
@@ -53,29 +53,25 @@ def computer_move!(brd)
   system 'cls'
   choice = nil
 
-  #offense
+  # offense
   WINNING_LINES.each do |line|
     choice = risk_square(line, brd, COMPUTER_MARKER)
     break if choice
   end
 
-# defense
-  if !choice
+  # defense
+  unless choice
     WINNING_LINES.each do |line|
       choice = risk_square(line, brd, PLAYER_MARKER)
       break if choice
     end
   end
 
-  if !choice
-    if brd[5] == INITIAL_MARKER
-      choice = 5
-    end
+  unless choice
+    choice = 5 if brd[5] == INITIAL_MARKER
   end
 
-  if !choice
-    choice = empty_squares(brd).sample
-  end
+  choice = empty_squares(brd).sample unless choice
 
   brd[choice] = COMPUTER_MARKER
 end
@@ -103,7 +99,6 @@ player_win_count = 0
 computer_win_count = 0
 loop do
   board = initialize_board
-
   loop do
     break if someone_won?(board) || board_full?(board)
     show_board(board)
