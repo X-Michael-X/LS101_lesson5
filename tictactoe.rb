@@ -3,17 +3,14 @@ require 'pry'
 INITIAL_MARKER = ' '.freeze
 PLAYER_MARKER = 'X'.freeze
 COMPUTER_MARKER = 'O'.freeze
+WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] +
+                [[1, 4, 7], [2, 5, 8], [3, 6, 9]] +
+                [[1, 5, 9], [3, 5, 7]].freeze
 
 puts 'Welcome to Tic Tac Toe v1.0'
 puts ' '
-puts 'The object of Tic Tac Toe is to get three in a row. You play on a three' \
-     'by three game board. The first player is known as X and the computer' \
-     'is O. Players alternate placing Xs and Os on the game board until' \
-     'either opponent has three in a row or all nine squares are filled.'
-puts ' '
 
 def show_board(brd)
-  system 'cls'
   puts "You're a #{PLAYER_MARKER}. Computer is #{COMPUTER_MARKER}"
   puts " #{brd[1]} | #{brd[2]} | #{brd[3]} "
   puts '---+---+---'
@@ -32,6 +29,15 @@ def empty_squares(brd)
   brd.keys.select { |num| brd[num] == INITIAL_MARKER }
 end
 
+def risk_square(line , board, marker)
+  if board.values_at(*line).count(marker) == 2
+    board.select{|key, value| line.include?(key) &&
+    value == INITIAL_MARKER}.keys.first
+  else
+    nil
+  end
+end
+
 def player_move!(brd)
   choice = ''
   loop do
@@ -44,7 +50,33 @@ def player_move!(brd)
 end
 
 def computer_move!(brd)
-  choice = empty_squares(brd).sample
+  system 'cls'
+  choice = nil
+
+  #offense
+  WINNING_LINES.each do |line|
+    choice = risk_square(line, brd, COMPUTER_MARKER)
+    break if choice
+  end
+
+# defense
+  if !choice
+    WINNING_LINES.each do |line|
+      choice = risk_square(line, brd, PLAYER_MARKER)
+      break if choice
+    end
+  end
+
+  if !choice
+    if brd[5] == INITIAL_MARKER
+      choice = 5
+    end
+  end
+
+  if !choice
+    choice = empty_squares(brd).sample
+  end
+
   brd[choice] = COMPUTER_MARKER
 end
 
@@ -53,18 +85,10 @@ def board_full?(brd)
 end
 
 def detect_winner(brd)
-  winning_lines = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] +
-                  [[1, 4, 7], [2, 5, 8], [3, 6, 9]] +
-                  [[1, 5, 9], [3, 5, 7]]
-
-  winning_lines.each do |line|
-    if brd[line[0]] == PLAYER_MARKER &&
-       brd[line[1]] == PLAYER_MARKER &&
-       brd[line[2]] == PLAYER_MARKER
+  WINNING_LINES.each do |line|
+    if brd.values_at(*line).count(PLAYER_MARKER) == 3
       return 'Player'
-    elsif brd[line[0]] == COMPUTER_MARKER &&
-          brd[line[1]] == COMPUTER_MARKER &&
-          brd[line[2]] == COMPUTER_MARKER
+    elsif brd.values_at(*line).count(COMPUTER_MARKER) == 3
       return 'Computer'
     end
   end
@@ -75,24 +99,38 @@ def someone_won?(brd)
   !!detect_winner(brd)
 end
 
+player_win_count = 0
+computer_win_count = 0
 loop do
   board = initialize_board
 
   loop do
+    break if someone_won?(board) || board_full?(board)
     show_board(board)
     player_move!(board)
-    break if board_full?(board) || someone_won?(board)
     computer_move!(board)
-    break if board_full?(board) || someone_won?(board)
   end
 
   show_board(board)
 
   if someone_won?(board)
+    puts ' '
     puts "#{detect_winner(board)} won!"
   else
+    puts ' '
     puts "It's a tie!"
   end
+
+  if detect_winner(board) == 'Player'
+    player_win_count += 1
+  elsif detect_winner(board) == 'Computer'
+    computer_win_count += 1
+  end
+
+  puts "Player has #{player_win_count} wins."
+  puts "Computer has #{computer_win_count} wins"
+
+  break if player_win_count == 5 || computer_win_count == 5
 
   puts 'Would you like to play again? (Y or N)?'
   play_again_answer = gets.chomp.downcase
@@ -101,4 +139,3 @@ end
 
 puts ' '
 puts 'Thanks for playing Tic Tac Toe v1.0.'
-
