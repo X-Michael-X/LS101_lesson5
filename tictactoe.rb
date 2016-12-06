@@ -41,10 +41,53 @@ def risk_square(line, board, marker)
   end
 end
 
+def joinor(array, delimiter =', ', word = 'or')
+  case array.size
+  when 0 then ''
+  when 1 then array.first
+  when 2 then array.join(" #{word} ")
+  else
+    array[-1] = "#{word} #{array.last}"
+    array.join(delimiter)
+  end
+end
+
+def first_move
+  first_move_answer = ''
+  loop do
+    puts "Choose who makes the first move , type p for Player or c for Computer"
+    first_move_answer = gets.chomp.downcase
+    break if first_move_answer == 'p' || first_move_answer == 'c'
+    puts "Invalid answer, Please type p for Player or c for Computer"
+  end
+
+  if first_move_answer == 'p'
+    "Player"
+  else
+    "Computer"
+  end
+end
+
+def alternate_player(current_player)
+  if current_player == "Player"
+    "Computer"
+  else
+    "Player"
+  end
+end
+
+def place_piece!(brd, current_player)
+  if current_player == "Player"
+    player_move!(brd)
+  else
+    computer_move!(brd)
+  end
+end
+
 def player_move!(brd)
   choice = ''
   loop do
-    puts "Choose a square (#{empty_squares(brd).join(', ')})"
+    puts "Choose a square #{joinor(empty_squares(brd), ', ')}"
     choice = gets.chomp.to_i
     break if empty_squares(brd).include?(choice)
     puts 'Sorry your choice was invalid. Please choose again'
@@ -96,12 +139,13 @@ computer_win_count = 0
 
 loop do # main loop
   board = initialize_board
+  current_player = first_move
 
   loop do
-    break if someone_won?(board) || board_full?(board)
     show_board(board)
-    player_move!(board)
-    computer_move!(board)
+    place_piece!(board, current_player)
+    current_player = alternate_player(current_player)
+    break if someone_won?(board) || board_full?(board)
   end
 
   show_board(board)
