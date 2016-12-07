@@ -38,7 +38,15 @@ def bust?(cards)
   hand_total(cards) > 21
 end
 
+def outcome(dealer_hand, player_hand)
+  puts
+  puts "Dealer had #{dealer_hand}, totaling #{hand_total(dealer_hand)}"
+  puts "You had #{player_hand}, totaling #{hand_total(player_hand)}"
+  puts
+end
+
 def another_hand?
+  puts
   puts "(Y)es to play another hand, or anything else to quit."
   another_round_answer = gets.chomp.downcase
   another_round_answer == 'y'
@@ -85,6 +93,7 @@ loop do # main loop
 
   clear_screen
   puts 'Welcome to TwentyOne'
+  puts
 
   2.times do
     player_hand << deck.pop
@@ -94,6 +103,7 @@ loop do # main loop
   puts "Dealer has #{dealer_hand[0]} and an unknown card."
   puts "You have #{player_hand[0]} and #{player_hand[1]}, totaling " \
        "#{hand_total(player_hand)}."
+  puts
 
   # Player
 
@@ -112,7 +122,7 @@ loop do # main loop
       puts "Your new hand is #{player_hand}, totaling " \
            "#{hand_total(player_hand)}."
     end
-
+    puts
     break if player_answer == 's' || bust?(player_hand)
   end
 
@@ -121,16 +131,21 @@ loop do # main loop
     another_hand? ? next : break
   else
     puts "You stayed with #{hand_total(player_hand)}"
+    puts
   end
 
   # Dealer
-
+  
+  puts "Dealer is thinking..."
+  sleep(2)
+  
   loop do
     break if bust?(dealer_hand) || hand_total(dealer_hand) >= 17
-
+    puts
     puts "Dealer Hits..."
     dealer_hand << deck.pop
     puts "Dealer now has #{dealer_hand} and an unknown card."
+    puts
   end
 
   if bust?(dealer_hand)
@@ -139,11 +154,8 @@ loop do # main loop
   else
     puts "Dealer stays with #{hand_total(dealer_hand)}"
   end
-
-  puts "~~~~~~~~~~~~~~~~~~"
-  puts "Dealer had #{dealer_hand}, totaling #{hand_total(dealer_hand)}"
-  puts "You had #{player_hand}, totaling #{hand_total(player_hand)}"
-  puts "~~~~~~~~~~~~~~~~~~"
+  
+  outcome(dealer_hand, player_hand)
 
   declare_winner(player_hand, dealer_hand)
   break unless another_hand?
