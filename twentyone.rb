@@ -86,7 +86,7 @@ def declare_winner(player_hand, dealer_hand)
   end
 end
 
-loop do # main loop
+loop do
   deck = initialize_deck.map! { |card| card.join(" of ") }
   player_hand = []
   dealer_hand = []
@@ -96,16 +96,14 @@ loop do # main loop
   puts
 
   2.times do
-    player_hand << deck.pop
-    dealer_hand << deck.pop
+    player_hand.push(deck.shift)
+    dealer_hand.push(deck.shift)
   end
 
   puts "Dealer has #{dealer_hand[0]} and an unknown card."
   puts "You have #{player_hand[0]} and #{player_hand[1]}, totaling " \
        "#{hand_total(player_hand)}."
   puts
-
-  # Player
 
   loop do
     player_answer = nil
@@ -118,7 +116,7 @@ loop do # main loop
     end
 
     if player_answer == 'h'
-      player_hand << deck.pop
+      player_hand.push(deck.shift)
       puts "Your new hand is #{player_hand}, totaling " \
            "#{hand_total(player_hand)}."
     end
@@ -133,8 +131,6 @@ loop do # main loop
     puts "You stayed with #{hand_total(player_hand)}"
     puts
   end
-
-  # Dealer
   
   puts "Dealer is thinking..."
   sleep(2)
@@ -143,7 +139,7 @@ loop do # main loop
     break if bust?(dealer_hand) || hand_total(dealer_hand) >= 17
     puts
     puts "Dealer Hits..."
-    dealer_hand << deck.pop
+    dealer_hand.push(deck.shift)
     puts "Dealer now has #{dealer_hand} and an unknown card."
     puts
   end
