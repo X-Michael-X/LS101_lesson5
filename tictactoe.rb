@@ -55,7 +55,7 @@ end
 def first_move
   first_move_answer = ''
   loop do
-    puts "Choose who makes the first move , type p for Player or c for Computer"
+    puts "Choose who makes the first move, type p for Player or c for Computer"
     first_move_answer = gets.chomp.downcase
     break if first_move_answer == 'p' || first_move_answer == 'c'
     puts "Invalid answer, Please type p for Player or c for Computer"
