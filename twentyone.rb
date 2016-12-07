@@ -140,7 +140,7 @@ loop do
     puts
     puts "Dealer Hits..."
     dealer_hand.push(deck.shift)
-    puts "Dealer now has #{dealer_hand} and an unknown card."
+    puts "Dealer now has #{dealer_hand.fill(" An unknown card ", 1, 1)}."
     puts
   end
 
