@@ -131,16 +131,16 @@ loop do
     puts "You stayed with #{hand_total(player_hand)}"
     puts
   end
-  
+
   puts "Dealer is thinking..."
   sleep(2)
-  
+
   loop do
     break if bust?(dealer_hand) || hand_total(dealer_hand) >= 17
     puts
     puts "Dealer Hits..."
     dealer_hand.push(deck.shift)
-    puts "Dealer now has #{dealer_hand.fill(" An unknown card ", 1, 1)}."
+    puts "Dealer now has #{dealer_hand.fill(' An unknown card ', 1, 1)}."
     puts
   end
 
@@ -150,7 +150,7 @@ loop do
   else
     puts "Dealer stays with #{hand_total(dealer_hand)}"
   end
-  
+
   outcome(dealer_hand, player_hand)
 
   declare_winner(player_hand, dealer_hand)
