@@ -3,8 +3,6 @@ SUITS = %w(Hearts Clubs Spades Diamonds).freeze
 FACES = %w(Ace 2 3 4 5 6 7 8 9 10 Jack Queen King).freeze
 DEALER_LIMIT = 17
 
-
-
 def initialize_deck
   FACES.product(SUITS).shuffle
 end
@@ -54,9 +52,12 @@ def end_of_match?(player_win_count, dealer_win_count)
 end
 
 def outcome(dealer_hand, player_hand)
+  dealer_total = lambda {hand_total(dealer_hand)}
+  player_total = lambda {hand_total(player_hand)}
+
   puts
-  puts "Dealer had #{joinand(dealer_hand)}, totaling #{hand_total(dealer_hand)}"
-  puts "You had #{joinand(player_hand)}, totaling #{hand_total(player_hand)}"
+  puts "Dealer had #{joinand(dealer_hand)}, totaling #{dealer_total.call}"
+  puts "You had #{joinand(player_hand)}, totaling #{player_total.call}"
   puts
 end
 
@@ -116,18 +117,8 @@ def display_score(player_win_count, dealer_win_count)
          "Dealer has: #{dealer_win_count}."
 end
 
-player_win_count = 0
-dealer_win_count = 0
-
-loop do
-  deck = initialize_deck.map! { |card| card.join(" of ") }
-  player_hand = []
-  dealer_hand = []
-
-  clear_screen
-  puts 'Welcome to TwentyOne'
-  puts
-
+def deal_hand(deck, player_hand, dealer_hand)
+  
   2.times do
     player_hand.push(deck.shift)
     dealer_hand.push(deck.shift)
@@ -136,26 +127,45 @@ loop do
   puts "Dealer has #{dealer_hand[0]} and an unknown card."
   puts "You have #{joinand(player_hand)}, totaling #{hand_total(player_hand)}."
   puts
+end
+  
+
+player_win_count = 0
+dealer_win_count = 0
+
+loop do
+  
+  clear_screen
+  deck = initialize_deck.map! { |card| card.join(" of ") }
+  player_hand = []
+  dealer_hand = []
+  
+  puts 'Welcome to TwentyOne'
+  puts
+
+  deal_hand(deck, player_hand, dealer_hand)
   
   loop do
+    
+    player_total = lambda {hand_total(player_hand)}
     player_answer = nil
-
     loop do
       puts "Would you like to (h)it or (s)tay?"
       player_answer = gets.chomp.downcase
       break if player_answer == 'h' || player_answer == 's'
       puts "Invalid answer, Would you like to (h)it or (s)tay?"
     end
-
+    
     if player_answer == 'h'
       player_hand.push(deck.shift)
       puts "Your new hand is #{joinand(player_hand)}, totaling " \
-           "#{hand_total(player_hand)}."
+           "#{player_total.call}."
     end
     puts
     break if player_answer == 's' || bust?(player_hand)
   end
-
+  
+  player_total = lambda {hand_total(player_hand)}
   if bust?(player_hand)
     dealer_win_count += 1
     display_winner(player_hand, dealer_hand)
@@ -163,17 +173,17 @@ loop do
     win_the_pot(player_win_count, dealer_win_count)
     break if end_of_match?(player_win_count, dealer_win_count)
     another_hand? ? next : break
-    
   else
-    puts "You stayed with #{hand_total(player_hand)}"
+    puts "You stayed with #{player_total.call}"
     puts
   end
-
+  
   puts "Dealer is thinking..."
   sleep(1)
 
   loop do
-    break if bust?(dealer_hand) || hand_total(dealer_hand) >= DEALER_LIMIT
+    dealer_total = lambda {hand_total(dealer_hand)}
+    break if bust?(dealer_hand) || dealer_total.call >= DEALER_LIMIT
     puts
     puts "Dealer Hits..."
     dealer_hand.push(deck.shift)
@@ -181,7 +191,8 @@ loop do
          "#{joinand(dealer_hand.fill(' An unknown card ', 1, 1))}."
     puts
   end
-
+  
+  dealer_total = lambda {hand_total(dealer_hand)}
   if bust?(dealer_hand)
     player_win_count += 1
     display_winner(player_hand, dealer_hand)
@@ -190,7 +201,7 @@ loop do
     break if end_of_match?(player_win_count, dealer_win_count)
     another_hand? ? next : break
   else
-    puts "Dealer stays with #{hand_total(dealer_hand)}"
+    puts "Dealer stays with #{dealer_total.call}"
   end
 
   outcome(dealer_hand, player_hand)
