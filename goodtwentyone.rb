@@ -148,7 +148,7 @@ loop do
 
   loop do
     player_answer = nil
-    
+
     loop do
       puts "Would you like to (h)it or (s)tay?"
       player_answer = gets.chomp.downcase
