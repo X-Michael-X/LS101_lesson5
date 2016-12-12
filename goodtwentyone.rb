@@ -52,12 +52,9 @@ def end_of_match?(player_win_count, dealer_win_count)
 end
 
 def outcome(dealer_hand, player_hand)
-  dealer_total = lambda {hand_total(dealer_hand)}
-  player_total = lambda {hand_total(player_hand)}
-
   puts
-  puts "Dealer had #{joinand(dealer_hand)}, totaling #{dealer_total.call}"
-  puts "You had #{joinand(player_hand)}, totaling #{player_total.call}"
+  puts "Dealer had #{joinand(dealer_hand)}, totaling #{hand_total(dealer_hand)}"
+  puts "You had #{joinand(player_hand)}, totaling #{hand_total(player_hand)}"
   puts
 end
 
@@ -100,9 +97,11 @@ def display_winner(player_hand, dealer_hand)
   
   case result
   when :player_bust
-    puts "You Busted with #{hand_total(player_hand)}.Dealer Won."
+    puts "You Busted with  #{joinand(player_hand)} totaling " \
+         "#{hand_total(player_hand)}.Dealer Won."
   when :dealer_bust
-    puts "Dealer Busted with #{hand_total(dealer_hand)}.You Won."
+    puts "Dealer Busted with #{joinand(dealer_hand)} totaling " \
+         "#{hand_total(dealer_hand)}.You Won."
   when :player_wins
     puts "You Won"
   when :dealer_wins
@@ -147,7 +146,6 @@ loop do
   
   loop do
     
-    player_total = lambda {hand_total(player_hand)}
     player_answer = nil
     loop do
       puts "Would you like to (h)it or (s)tay?"
@@ -159,13 +157,12 @@ loop do
     if player_answer == 'h'
       player_hand.push(deck.shift)
       puts "Your new hand is #{joinand(player_hand)}, totaling " \
-           "#{player_total.call}."
+           "#{hand_total(player_hand)}."
     end
     puts
     break if player_answer == 's' || bust?(player_hand)
   end
   
-  player_total = lambda {hand_total(player_hand)}
   if bust?(player_hand)
     dealer_win_count += 1
     display_winner(player_hand, dealer_hand)
@@ -174,7 +171,7 @@ loop do
     break if end_of_match?(player_win_count, dealer_win_count)
     another_hand? ? next : break
   else
-    puts "You stayed with #{player_total.call}"
+    puts "You stayed with #{hand_total(player_hand)}"
     puts
   end
   
@@ -182,17 +179,16 @@ loop do
   sleep(1)
 
   loop do
-    dealer_total = lambda {hand_total(dealer_hand)}
-    break if bust?(dealer_hand) || dealer_total.call >= DEALER_LIMIT
+    hidden_hand = dealer_hand.dup
+    break if bust?(dealer_hand) || hand_total(dealer_hand) >= DEALER_LIMIT
     puts
     puts "Dealer Hits..."
     dealer_hand.push(deck.shift)
-    puts "Dealer now has " \
-         "#{joinand(dealer_hand.fill(' An unknown card ', 1, 1))}."
+    puts "Dealer now has #{joinand(hidden_hand.fill('an unknown card', 1, 1))}."
     puts
   end
   
-  dealer_total = lambda {hand_total(dealer_hand)}
+  
   if bust?(dealer_hand)
     player_win_count += 1
     display_winner(player_hand, dealer_hand)
@@ -201,10 +197,11 @@ loop do
     break if end_of_match?(player_win_count, dealer_win_count)
     another_hand? ? next : break
   else
-    puts "Dealer stays with #{dealer_total.call}"
+    puts "Dealer stays with #{hand_total(dealer_hand)}"
   end
 
   outcome(dealer_hand, player_hand)
+  
   
   case compare_hands(player_hand, dealer_hand)
       when :dealer_wins
