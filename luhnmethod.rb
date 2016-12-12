@@ -9,3 +9,6 @@ def luhn_cc_number?(string)
 
   (check_sum % 10).zero?
 end
+
+# use (0..16).map{|num| num = rand(0..9).to_s}.join('') to generate
+# bad cc numbers
