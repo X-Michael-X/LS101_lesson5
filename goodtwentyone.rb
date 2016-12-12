@@ -2,6 +2,7 @@ require 'pry'
 SUITS = %w(Hearts Clubs Spades Diamonds).freeze
 FACES = %w(Ace 2 3 4 5 6 7 8 9 10 Jack Queen King).freeze
 DEALER_LIMIT = 17
+WINNING_HAND = 21
 
 def initialize_deck
   FACES.product(SUITS).shuffle
@@ -19,9 +20,7 @@ def hand_total(cards)
   face_value.each do |face|
     total += if face.start_with?("A")
                11
-             elsif face.to_i.zero?
-               10
-             elsif face.start_with?("1")
+             elsif face.to_i.zero? || face.start_with?("1")
                10
              else
                face.to_i
@@ -36,7 +35,7 @@ def hand_total(cards)
 end
 
 def bust?(cards)
-  hand_total(cards) > 21
+  hand_total(cards) > WINNING_HAND
 end
 
 def display_win_the_pot(player_win_count, dealer_win_count)
@@ -51,14 +50,6 @@ def end_of_match?(player_win_count, dealer_win_count)
   player_win_count == 5 || dealer_win_count == 5
 end
 
-def display_wsp(player_hand, dealer_hand, player_win_count, dealer_win_count)
-  display_winner(player_hand, dealer_hand)
-  puts
-  display_score(player_win_count, dealer_win_count)
-  puts
-  display_win_the_pot(player_win_count, dealer_win_count)
-end
-
 def outcome(dealer_hand, player_hand)
   puts
   puts "Dealer had #{joinand(dealer_hand)}, totaling " \
@@ -69,8 +60,13 @@ end
 
 def another_hand?
   puts
-  puts "(Y)es to play another hand, or anything else to quit."
-  another_round_answer = gets.chomp.downcase
+  another_round_answer = ''
+  loop do
+    puts "(Y)es to play another hand, or (N)o to quit."
+    another_round_answer = gets.chomp.downcase
+    break if another_round_answer == 'y' || another_round_answer == 'n'
+    puts "Invalid ANswer.(Y)es to play another hand, or (N)o to quit."
+  end
   another_round_answer == 'y'
 end
 
@@ -88,9 +84,9 @@ def compare_hands(player_hand, dealer_hand)
   player_hand_total = hand_total(player_hand)
   dealer_hand_total = hand_total(dealer_hand)
 
-  if player_hand_total > 21
+  if player_hand_total > WINNING_HAND
     :player_bust
-  elsif dealer_hand_total > 21
+  elsif dealer_hand_total > WINNING_HAND
     :dealer_bust
   elsif player_hand_total > dealer_hand_total
     :player_wins
@@ -152,6 +148,7 @@ loop do
 
   loop do
     player_answer = nil
+    
     loop do
       puts "Would you like to (h)it or (s)tay?"
       player_answer = gets.chomp.downcase
@@ -170,7 +167,9 @@ loop do
 
   if bust?(player_hand)
     dealer_win_count += 1
-    display_wsp(player_hand, dealer_hand, player_win_count, dealer_win_count)
+    display_winner(player_hand, dealer_hand)
+    display_score(player_win_count, dealer_win_count)
+    display_win_the_pot(player_win_count, dealer_win_count)
     break if end_of_match?(player_win_count, dealer_win_count)
     another_hand? ? next : break
   else
@@ -182,18 +181,19 @@ loop do
   sleep(1)
 
   loop do
-    hidden_hand = dealer_hand.dup
     break if bust?(dealer_hand) || hand_total(dealer_hand) >= DEALER_LIMIT
     puts
     puts "Dealer Hits..."
     dealer_hand.push(deck.shift)
-    puts "Dealer now has #{joinand(hidden_hand.fill('an unknown card', 1, 1))}."
+    puts "Dealer now has #{joinand(dealer_hand)}."
     puts
   end
 
   if bust?(dealer_hand)
     player_win_count += 1
-    display_wsp(player_hand, dealer_hand, player_win_count, dealer_win_count)
+    display_winner(player_hand, dealer_hand)
+    display_score(player_win_count, dealer_win_count)
+    display_win_the_pot(player_win_count, dealer_win_count)
     break if end_of_match?(player_win_count, dealer_win_count)
     another_hand? ? next : break
   else
