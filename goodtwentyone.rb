@@ -13,14 +13,14 @@ def clear_screen
 end
 
 def hand_total(cards)
-  face_value = cards.map { |card| card[0] }
+  face_value = cards.map { |card| card }
 
   total = 0
 
   face_value.each do |face|
     total += if face.start_with?("A")
                11
-             elsif face.to_i.zero? || face.start_with?("1")
+             elsif face.to_i.zero?
                10
              else
                face.to_i
@@ -103,17 +103,15 @@ def display_winner(player_hand, dealer_hand)
 
   case result
   when :player_bust
-    puts "You Busted with  #{joinand(player_hand)} totaling " \
-         "#{hand_total(player_hand)}.Dealer Won."
+    puts "You busted with  #{joinand(player_hand)}, totaling " \
+         "#{hand_total(player_hand)}."
+    puts
+    puts "Dealer Wins the Hand."
   when :dealer_bust
-    puts "Dealer Busted with #{joinand(dealer_hand)} totaling " \
-         "#{hand_total(dealer_hand)}.You Won."
-  when :player_wins
-    puts "You Won"
-  when :dealer_wins
-    puts "Dealer Won"
-  when :tie
-    puts "It's a Tie"
+    puts "Dealer busted with #{joinand(dealer_hand)}, totaling " \
+         "#{hand_total(dealer_hand)}."
+    puts
+    puts "You Win the Hand."
   end
 end
 
@@ -168,10 +166,10 @@ loop do
 
     if player_answer == 'h'
       player_hand.push(deck.shift)
-      puts "Your new hand is #{joinand(player_hand)}, totaling " \
+      puts
+      puts "Your new hand is #{joinand(player_hand)} totaling, " \
            "#{hand_total(player_hand)}."
     end
-    puts
     break if player_answer == 's' || bust?(player_hand)
   end
 
@@ -211,8 +209,12 @@ loop do
   case compare_hands(player_hand, dealer_hand)
   when :dealer_wins
     dealer_count += 1
+    puts "The Dealer Wins the Hand."
   when :player_wins
     player_count += 1
+    puts "You Win the Hand."
+  when :tie
+    puts "It's a Tie."
   end
 
   display_score(player_count, dealer_count)
