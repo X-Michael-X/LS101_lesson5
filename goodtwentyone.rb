@@ -28,7 +28,7 @@ def hand_total(cards)
   end
 
   face_value.count { |face| face.start_with?("A") }.times do
-    total -= 10 if total > 21
+    total -= 10 if total > WINNING_HAND
   end
 
   total
@@ -38,16 +38,16 @@ def bust?(cards)
   hand_total(cards) > WINNING_HAND
 end
 
-def display_win_the_pot(player_win_count, dealer_win_count)
-  if player_win_count == 5
+def display_win_the_pot(player_count, dealer_count)
+  if player_count == 5
     puts "Player Wins The Pot"
-  elsif dealer_win_count == 5
+  elsif dealer_count == 5
     puts "Dealer Wins The Pot"
   end
 end
 
-def end_of_match?(player_win_count, dealer_win_count)
-  player_win_count == 5 || dealer_win_count == 5
+def end_of_match?(player_count, dealer_count)
+  player_count == 5 || dealer_count == 5
 end
 
 def outcome(dealer_hand, player_hand)
@@ -65,7 +65,8 @@ def another_hand?
     puts "(Y)es to play another hand, or (N)o to quit."
     another_round_answer = gets.chomp.downcase
     break if another_round_answer == 'y' || another_round_answer == 'n'
-    puts "Invalid ANswer.(Y)es to play another hand, or (N)o to quit."
+    puts "Invalid Answer.(Y)es to play another hand, or (N)o to quit."
+    puts
   end
   another_round_answer == 'y'
 end
@@ -116,9 +117,18 @@ def display_winner(player_hand, dealer_hand)
   end
 end
 
-def display_score(player_win_count, dealer_win_count)
-  puts "Your score is: #{player_win_count} " \
-        "Dealer has: #{dealer_win_count}."
+def display_score(player_count, dealer_count)
+  puts "Your score is: #{player_count} " \
+        "Dealer has: #{dealer_count}."
+end
+
+def p_win_score_pot(player_hand, dealer_hand, player_count, dealer_count)
+  puts
+  display_winner(player_hand, dealer_hand)
+  puts
+  display_score(player_count, dealer_count)
+  puts
+  display_win_the_pot(player_count, dealer_count)
 end
 
 def deal_hand(deck, player_hand, dealer_hand)
@@ -132,8 +142,8 @@ def deal_hand(deck, player_hand, dealer_hand)
   puts
 end
 
-player_win_count = 0
-dealer_win_count = 0
+player_count = 0
+dealer_count = 0
 
 loop do
   clear_screen
@@ -166,11 +176,9 @@ loop do
   end
 
   if bust?(player_hand)
-    dealer_win_count += 1
-    display_winner(player_hand, dealer_hand)
-    display_score(player_win_count, dealer_win_count)
-    display_win_the_pot(player_win_count, dealer_win_count)
-    break if end_of_match?(player_win_count, dealer_win_count)
+    dealer_count += 1
+    p_win_score_pot(player_hand, dealer_hand, player_count, dealer_count)
+    break if end_of_match?(player_count, dealer_count)
     another_hand? ? next : break
   else
     puts "You stayed with #{hand_total(player_hand)}"
@@ -190,11 +198,9 @@ loop do
   end
 
   if bust?(dealer_hand)
-    player_win_count += 1
-    display_winner(player_hand, dealer_hand)
-    display_score(player_win_count, dealer_win_count)
-    display_win_the_pot(player_win_count, dealer_win_count)
-    break if end_of_match?(player_win_count, dealer_win_count)
+    player_count += 1
+    p_win_score_pot(player_hand, dealer_hand, player_count, dealer_count)
+    break if end_of_match?(player_count, dealer_count)
     another_hand? ? next : break
   else
     puts "Dealer stays with #{hand_total(dealer_hand)}"
@@ -204,12 +210,12 @@ loop do
 
   case compare_hands(player_hand, dealer_hand)
   when :dealer_wins
-    dealer_win_count += 1
+    dealer_count += 1
   when :player_wins
-    player_win_count += 1
+    player_count += 1
   end
 
-  display_score(player_win_count, dealer_win_count)
+  display_score(player_count, dealer_count)
 
   break unless another_hand?
 end
